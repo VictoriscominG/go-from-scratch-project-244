@@ -32,14 +32,22 @@ func main() {
 			path1 := args[0]
 			path2 := args[1]
 
-			format := cmd.String("format")
+			//format := cmd.String("format")
 
-			fmt.Sprintf("Format: %s\n", format)
+			config1, err := myparser.ParseFile(path1)
+			if err != nil {
+				return err
+			}
+			config2, err := myparser.ParseFile(path2)
+			if err != nil {
+				return err
+			}
 
-			config1, _ := myparser.ParseFile(path1)
-			config2, _ := myparser.ParseFile(path2)
+			str, err := diff.DiffFile(config1, config2)
+			if err != nil {
+				return err
+			}
 
-			str, _ := diff.DiffFile(config1, config2)
 			fmt.Println(str)
 
 			return nil

@@ -3,7 +3,6 @@ package parser
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -34,7 +33,7 @@ func ParseFile(path string) (Config, error) {
 
 	// Обработка символической ссылки
 	if info.Mode()&os.ModeSymlink != 0 {
-		log.Printf("Warning: %s is a symbolic link, moving on to the goal", absPath)
+		fmt.Fprintf(os.Stderr, "Warning: %s is a symbolic link, resolving to target\n", absPath)
 		info, err = os.Stat(absPath)
 		if err != nil {
 			return nil, fmt.Errorf("broken symbolic link: %w", err)

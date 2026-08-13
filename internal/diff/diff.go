@@ -55,7 +55,7 @@ func DiffFile(conf1, conf2 map[string]interface{}) (string, error) {
 			}
 		}
 	}
-	lines = append(lines, "}")
+	lines = append(lines, "}\n")
 
 	return strings.Join(lines, "\n"), nil
 }

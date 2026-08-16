@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   ci:
@@ -17,7 +17,7 @@ jobs:
       - name: Set up Go 1.26.2
         uses: actions/setup-go@v5
         with:
-          go-version: '1.26.2'
+          go-version: "1.26.2"
 
       - name: Cache Go modules and build cache
         uses: actions/cache@v3
@@ -25,41 +25,46 @@ jobs:
           path: |
             ~/go/pkg/mod
             ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('go.mod') }}
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-        
+
       - name: Tidy and verify build
         run: |
           go mod tidy
           go build ./cmd/gendiff
 
       - name: Install golangci-lint
-        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.62.3
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
 
       - name: Lint
         run: make lint
 
       - name: Test with coverage
-        run: go test ./... -coverprofile=coverage.out
+        run: |
+          go test ./... -coverprofile=coverage.out -v
+          go tool cover -func=coverage.out
 
-      - name: Show coverage summary
-        run: go tool cover -func=coverage.out
-
-      - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage.out
+      - name: Check coverage file exists
+        run: |
+          if [ ! -f "./coverage.out" ]; then
+            echo "ERROR: coverage.out not found!"
+            exit 1
+          else
+            echo "OK: coverage.out exists, size=$(wc -c < ./coverage.out) bytes"
+          fi
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v1.6
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           projectBaseDir: .
           args: >
-            -Dsonar.go.coverage.reportPaths=coverage.out
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.organization=victoriscoming
+            -Dsonar.projectKey=VictoriscominG_go-from-scratch-project-244
+            -Dsonar.go.coverage.reportPaths=./coverage.out
+            -Dsonar.scm.revision=${{ github.sha }}
+            -Dsonar.scm.branch=${{ github.ref_name }}

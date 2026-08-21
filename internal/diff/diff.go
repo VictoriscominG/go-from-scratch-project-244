@@ -2,24 +2,44 @@ package diff
 
 import (
 	"fmt"
+	"reflect"
 	"sort"
-	"strings"
 )
 
-func DiffFile(conf1, conf2 map[string]interface{}) (string, error) {
-	if conf1 == nil {
-		return "", fmt.Errorf("I can’t compare an empty configuration: %v", conf1)
+const (
+	ChangeAdded     = "added"
+	ChangeRemoved   = "removed"
+	ChangeUpdated   = "updated"
+	ChangeUnchanged = "unchanged"
+	ChangeNested    = "nested"
+)
+
+type DiffItem struct {
+	Key    string      `json:"key" yaml:"key"`
+	Type   string      `json:"type" yaml:"type"`
+	Before interface{} `json:"before,omitempty" yaml:"before,omitempty"`
+	After  interface{} `json:"after,omitempty" yaml:"after,omitempty"`
+	Nested *DiffResult `json:"nested,omitempty" yaml:"nested,omitempty"`
+}
+
+type DiffResult struct {
+	Items []DiffItem `json:"items" yaml:"items"`
+}
+
+func DiffFile(config1, config2 map[string]interface{}) (*DiffResult, error) {
+	if config1 == nil {
+		return nil, fmt.Errorf("I can’t compare an empty configuration: %v", config1)
 	}
-	if conf2 == nil {
-		return "", fmt.Errorf("I can’t compare an empty configuration: %v", conf2)
+	if config2 == nil {
+		return nil, fmt.Errorf("I can’t compare an empty configuration: %v", config2)
 	}
 
-	// Собираем все уникальные ключи из обоих конфигов
+	// Собираем все уникальные ключи из двух структур
 	keysMap := make(map[string]struct{})
-	for k := range conf1 {
+	for k := range config1 {
 		keysMap[k] = struct{}{}
 	}
-	for k := range conf2 {
+	for k := range config2 {
 		keysMap[k] = struct{}{}
 	}
 
@@ -30,32 +50,103 @@ func DiffFile(conf1, conf2 map[string]interface{}) (string, error) {
 	}
 	sort.Strings(keys)
 
-	// Создаём слайс строк для вывода, вносим данные
-	var lines []string
-	lines = append(lines, "{")
+	// Объявляем коллекцию []DiffItem для сбора элементов diff
+	var items []DiffItem
 
 	for _, k := range keys {
-		v1, ok1 := conf1[k]
-		v2, ok2 := conf2[k]
+		v1, ok1 := config1[k]
+		v2, ok2 := config2[k]
+
+		// Проверяем тип значения на мапу
+		map1, isMap1 := v1.(map[string]interface{})
+		map2, isMap2 := v2.(map[string]interface{})
+
+		// Объявляем временный объект для одного ключа на текущей итерации
+		var item DiffItem
+		item.Key = k
 
 		switch {
 		case !ok1 && ok2:
-			// Добавлено во втором конфиге
-			lines = append(lines, fmt.Sprintf("  + %s: %v", k, v2))
-		case ok1 && !ok2:
-			// Удалено во втором конфиге
-			lines = append(lines, fmt.Sprintf("  - %s: %v", k, v1))
-		default:
-			// Есть в обоих — сравниваем значения
-			if v1 == v2 {
-				lines = append(lines, fmt.Sprintf("    %s: %v", k, v1)) // без изменений
+			// Добавлено
+			if isMap2 {
+				// Добавили мапу целиком: внутри неё ничего не сравнивается,
+				// все вложенные элементы помечаем как added (со значениями).
+				emptyMap := make(map[string]interface{})
+				nestedResult, err := DiffFile(emptyMap, map2)
+				if err != nil {
+					return nil, err
+				}
+				item.Type = ChangeAdded
+				item.Nested = nestedResult
 			} else {
-				lines = append(lines, fmt.Sprintf("  - %s: %v", k, v1))
-				lines = append(lines, fmt.Sprintf("  + %s: %v", k, v2))
+				// Добавленный скаляр
+				item.Type = ChangeAdded
+				item.After = v2
+			}
+		case ok1 && !ok2:
+			// Удалено
+			if isMap1 {
+				// Удалили мапу целиком: все вложенные элементы — removed (со значениями).
+				emptyMap := make(map[string]interface{})
+				nestedResult, err := DiffFile(map1, emptyMap)
+				if err != nil {
+					return nil, err
+				}
+				item.Type = ChangeRemoved
+				item.Nested = nestedResult
+			} else {
+				// Удалённый скаляр
+				item.Type = ChangeRemoved
+				item.Before = v1
+			}
+		case isMap1 && isMap2:
+			// Вложенная структура присутствует в обоих файлах — сравниваем рекурсивно.
+			item.Type = ChangeNested
+			nestedResult, err := DiffFile(map1, map2)
+			if err != nil {
+				return nil, err
+			}
+			item.Nested = nestedResult
+		case isMap1 && !isMap2:
+			// Мапа превратилась в скаляр: рисуем два элемента —
+			// удалённую мапу и добавленный скаляр.
+			removed := DiffItem{Key: k, Type: ChangeRemoved}
+			emptyMap := make(map[string]interface{})
+			nestedResult, err := DiffFile(map1, emptyMap)
+			if err != nil {
+				return nil, err
+			}
+			removed.Nested = nestedResult
+			items = append(items, removed)
+
+			item.Type = ChangeAdded
+			item.After = v2
+		case !isMap1 && isMap2:
+			// Скаляр превратился в мапу: удалённый скаляр + добавленная мапа.
+			removed := DiffItem{Key: k, Type: ChangeRemoved, Before: v1}
+			items = append(items, removed)
+
+			item.Type = ChangeAdded
+			emptyMap := make(map[string]interface{})
+			nestedResult, err := DiffFile(emptyMap, map2)
+			if err != nil {
+				return nil, err
+			}
+			item.Nested = nestedResult
+		default:
+			// Сравнение двух скаляров
+			if reflect.DeepEqual(v1, v2) {
+				// Значение не изменилось
+				item.Type = ChangeUnchanged
+				item.Before = v1
+			} else {
+				// Значение изменилось
+				item.Type = ChangeUpdated
+				item.Before = v1
+				item.After = v2
 			}
 		}
+		items = append(items, item)
 	}
-	lines = append(lines, "}")
-
-	return strings.Join(lines, "\n"), nil
+	return &DiffResult{Items: items}, nil
 }

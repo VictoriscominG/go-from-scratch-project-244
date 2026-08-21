@@ -12,4 +12,4 @@ lint-fix:
 
 #Тестируем функцию DiffFile на сравнении двух json файлах
 test:
-	go test -v ./internal/diff/
+	go test ./...

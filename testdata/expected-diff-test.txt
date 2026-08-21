@@ -1,0 +1,179 @@
+{
+  "items": [
+    {
+      "key": "common",
+      "type": "nested",
+      "nested": {
+        "items": [
+          {
+            "key": "follow",
+            "type": "added",
+            "after": false
+          },
+          {
+            "key": "setting1",
+            "type": "unchanged",
+            "before": "Value 1"
+          },
+          {
+            "key": "setting2",
+            "type": "removed",
+            "before": 200
+          },
+          {
+            "key": "setting3",
+            "type": "updated",
+            "before": true
+          },
+          {
+            "key": "setting4",
+            "type": "added",
+            "after": "blah blah"
+          },
+          {
+            "key": "setting5",
+            "type": "added",
+            "nested": {
+              "items": [
+                {
+                  "key": "key5",
+                  "type": "added",
+                  "after": "value5"
+                }
+              ]
+            }
+          },
+          {
+            "key": "setting6",
+            "type": "nested",
+            "nested": {
+              "items": [
+                {
+                  "key": "doge",
+                  "type": "nested",
+                  "nested": {
+                    "items": [
+                      {
+                        "key": "wow",
+                        "type": "updated",
+                        "before": "",
+                        "after": "so much"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "key": "key",
+                  "type": "unchanged",
+                  "before": "value"
+                },
+                {
+                  "key": "ops",
+                  "type": "added",
+                  "after": "vops"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "key": "group1",
+      "type": "nested",
+      "nested": {
+        "items": [
+          {
+            "key": "baz",
+            "type": "updated",
+            "before": "bas",
+            "after": "bars"
+          },
+          {
+            "key": "foo",
+            "type": "unchanged",
+            "before": "bar"
+          },
+          {
+            "key": "nest",
+            "type": "removed",
+            "nested": {
+              "items": [
+                {
+                  "key": "key",
+                  "type": "removed",
+                  "before": "value"
+                }
+              ]
+            }
+          },
+          {
+            "key": "nest",
+            "type": "added",
+            "after": "str"
+          }
+        ]
+      }
+    },
+    {
+      "key": "group2",
+      "type": "removed",
+      "nested": {
+        "items": [
+          {
+            "key": "abc",
+            "type": "removed",
+            "before": 12345
+          },
+          {
+            "key": "deep",
+            "type": "removed",
+            "nested": {
+              "items": [
+                {
+                  "key": "id",
+                  "type": "removed",
+                  "before": 45
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "key": "group3",
+      "type": "added",
+      "nested": {
+        "items": [
+          {
+            "key": "deep",
+            "type": "added",
+            "nested": {
+              "items": [
+                {
+                  "key": "id",
+                  "type": "added",
+                  "nested": {
+                    "items": [
+                      {
+                        "key": "number",
+                        "type": "added",
+                        "after": 45
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "key": "fee",
+            "type": "added",
+            "after": 100500
+          }
+        ]
+      }
+    }
+  ]
+}

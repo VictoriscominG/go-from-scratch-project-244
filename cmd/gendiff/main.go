@@ -1,13 +1,13 @@
 package main
 
 import (
+	mydiff "code/internal/diff"
+	myparser "code/internal/parser"
+	myrender "code/internal/render"
 	"context"
 	"fmt"
 	"log"
 	"os"
-
-	"code/internal/diff"
-	myparser "code/internal/parser"
 
 	"github.com/urfave/cli/v3"
 )
@@ -43,11 +43,12 @@ func main() {
 				return err
 			}
 
-			str, err := diff.DiffFile(config1, config2)
+			diffResult, err := mydiff.DiffFile(config1, config2)
 			if err != nil {
 				return err
 			}
 
+			str := myrender.RenderStylish(diffResult)
 			fmt.Println(str)
 
 			return nil

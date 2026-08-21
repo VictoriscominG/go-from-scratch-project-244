@@ -9,9 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Config map[string]interface{}
-
-func ParseFile(path string) (Config, error) {
+func ParseFile(path string) (map[string]interface{}, error) {
 	// Переводим относительный путь в абсолютный
 	absPath, err := filepath.Abs(path)
 	if err != nil {
@@ -23,9 +21,9 @@ func ParseFile(path string) (Config, error) {
 	if err != nil {
 		switch {
 		case os.IsNotExist(err):
-			return nil, fmt.Errorf("the file or directory does not exist: %s", path)
+			return nil, fmt.Errorf("the file or directory does not exist: %s: %w", path, err)
 		case os.IsPermission(err):
-			return nil, fmt.Errorf("no access rights to %s", path)
+			return nil, fmt.Errorf("no access rights to %s: %w", path, err)
 		default:
 			return nil, fmt.Errorf("unknown error when accessing %s: %w", path, err)
 		}
@@ -51,7 +49,7 @@ func ParseFile(path string) (Config, error) {
 		return nil, fmt.Errorf("failed to read file %s: %w", absPath, err)
 	}
 
-	var config Config
+	var config map[string]interface{}
 
 	// Определяем расширение json/yaml
 	ext := filepath.Ext(absPath)
@@ -62,6 +60,7 @@ func ParseFile(path string) (Config, error) {
 		err = json.Unmarshal(data, &config)
 	case ".yaml", ".yml":
 		err = yaml.Unmarshal(data, &config)
+		config = normalizeYamlToJSONTypes(config).(map[string]interface{})
 	default:
 		return nil, fmt.Errorf("unsupported extension: %q (file: %s)", ext, absPath)
 	}
@@ -71,4 +70,27 @@ func ParseFile(path string) (Config, error) {
 	}
 
 	return config, nil
+}
+
+// normalizeToJSONTypes приводит целые числа к float64,
+// чтобы типы совпадали с теми, что даёт encoding/json
+func normalizeYamlToJSONTypes(v interface{}) interface{} {
+	switch val := v.(type) {
+	case map[string]interface{}:
+		for k, child := range val {
+			val[k] = normalizeYamlToJSONTypes(child)
+		}
+		return val
+	case []interface{}:
+		for i, child := range val {
+			val[i] = normalizeYamlToJSONTypes(child)
+		}
+		return val
+	case int:
+		return float64(val)
+	case int64:
+		return float64(val)
+	default:
+		return v
+	}
 }

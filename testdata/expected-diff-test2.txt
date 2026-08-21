@@ -1,0 +1,40 @@
+{
+  "items": [
+    {
+      "key": "group1",
+      "type": "unchanged",
+      "before": "baz"
+    },
+    {
+      "key": "group2",
+      "type": "nested",
+      "nested": {
+        "items": [
+          {
+            "key": "group3",
+            "type": "removed",
+            "before": "stars"
+          },
+          {
+            "key": "group3",
+            "type": "added",
+            "nested": {
+              "items": [
+                {
+                  "key": "group4",
+                  "type": "added",
+                  "after": 4
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "key": "group3",
+      "type": "unchanged",
+      "before": 7
+    }
+  ]
+}

@@ -20,7 +20,7 @@ func main() {
 			&cli.StringFlag{
 				Name:    "format",
 				Aliases: []string{"f"},
-				Usage:   "output format (stylish, plain)",
+				Usage:   "output format (stylish, plain, json)",
 				Value:   "stylish",
 			},
 		},
@@ -48,7 +48,10 @@ func main() {
 				return err
 			}
 
-			str := myformatter.Formatters(diffResult, format)
+			str, err := myformatter.Formatters(diffResult, format)
+			if err != nil {
+				return err
+			}
 			fmt.Println(str)
 
 			return nil

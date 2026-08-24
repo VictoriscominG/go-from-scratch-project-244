@@ -15,31 +15,43 @@ func TestFormatters(t *testing.T) {
 		name, before, after, expected, format string
 	}{
 		{
-			name:     "test json diff format stylish",
+			name:     "test json file diff format stylish",
 			before:   "recursive-file1.json",
 			after:    "recursive-file2.json",
 			expected: "expected-diff-stylish.txt",
 			format:   "stylish",
 		}, {
-			name:     "test yaml diff format stylish",
+			name:     "test yaml file diff format stylish",
 			before:   "recursive-file1.yaml",
 			after:    "recursive-file2.yaml",
 			expected: "expected-diff-stylish.txt",
 			format:   "stylish",
 		}, {
-			name:     "test json diff format plain",
+			name:     "test json file diff format plain",
 			before:   "recursive-file1.json",
 			after:    "recursive-file2.json",
 			expected: "expected-diff-plain.txt",
 			format:   "plain",
 		}, {
-			name:     "test yaml diff format plain",
+			name:     "test yaml file diff format plain",
 			before:   "recursive-file1.yaml",
 			after:    "recursive-file2.yaml",
 			expected: "expected-diff-plain.txt",
 			format:   "plain",
 		}, {
-			name:     "test json diff whithout format",
+			name:     "test json file diff format json",
+			before:   "recursive-file1.json",
+			after:    "recursive-file2.json",
+			expected: "expected-diff-json.txt",
+			format:   "json",
+		}, {
+			name:     "test yaml file diff format json",
+			before:   "recursive-file1.yaml",
+			after:    "recursive-file2.yaml",
+			expected: "expected-diff-json.txt",
+			format:   "json",
+		}, {
+			name:     "test json file diff whithout format",
 			before:   "recursive-file1.json",
 			after:    "recursive-file2.json",
 			expected: "expected-diff-stylish.txt",
@@ -62,7 +74,8 @@ func TestFormatters(t *testing.T) {
 			diffResult, err := mydiff.DiffFile(before, after)
 			require.NoError(t, err)
 
-			renderResult := Formatters(diffResult, tt.format)
+			renderResult, err := Formatters(diffResult, tt.format)
+			require.NoError(t, err)
 
 			expected, err := os.ReadFile(expectedPath)
 			require.NoError(t, err)

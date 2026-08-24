@@ -17,7 +17,7 @@ func TestDiffFile(t *testing.T) {
 	t.Run("test recursive diff json", func(t *testing.T) {
 		beforePath := filepath.Join(basePath, "recursive-file1.json")
 		afterPath := filepath.Join(basePath, "recursive-file2.json")
-		expectedPath := filepath.Join(basePath, "expected-diff-test.txt")
+		expectedPath := filepath.Join(basePath, "expected-diff-json.txt")
 
 		before, err := myparser.ParseFile(beforePath)
 		require.NoError(t, err)

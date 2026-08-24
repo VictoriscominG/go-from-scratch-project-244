@@ -2,8 +2,8 @@ package main
 
 import (
 	mydiff "code/internal/diff"
+	myformatter "code/internal/formatters"
 	myparser "code/internal/parser"
-	myrender "code/internal/render"
 	"context"
 	"fmt"
 	"log"
@@ -20,7 +20,7 @@ func main() {
 			&cli.StringFlag{
 				Name:    "format",
 				Aliases: []string{"f"},
-				Usage:   "output format",
+				Usage:   "output format (stylish, plain)",
 				Value:   "stylish",
 			},
 		},
@@ -32,7 +32,7 @@ func main() {
 			path1 := args[0]
 			path2 := args[1]
 
-			//format := cmd.String("format")
+			format := cmd.String("format")
 
 			config1, err := myparser.ParseFile(path1)
 			if err != nil {
@@ -48,7 +48,7 @@ func main() {
 				return err
 			}
 
-			str := myrender.RenderStylish(diffResult)
+			str := myformatter.Formatters(diffResult, format)
 			fmt.Println(str)
 
 			return nil

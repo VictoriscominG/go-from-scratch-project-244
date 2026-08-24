@@ -2,42 +2,42 @@
   "items": [
     {
       "key": "common",
-      "type": "nested",
+      "status": "nested",
       "nested": {
         "items": [
           {
             "key": "follow",
-            "type": "added",
+            "status": "added",
             "after": false
           },
           {
             "key": "setting1",
-            "type": "unchanged",
+            "status": "unchanged",
             "before": "Value 1"
           },
           {
             "key": "setting2",
-            "type": "removed",
+            "status": "removed",
             "before": 200
           },
           {
             "key": "setting3",
-            "type": "updated",
+            "status": "updated",
             "before": true
           },
           {
             "key": "setting4",
-            "type": "added",
+            "status": "added",
             "after": "blah blah"
           },
           {
             "key": "setting5",
-            "type": "added",
+            "status": "added",
             "nested": {
               "items": [
                 {
                   "key": "key5",
-                  "type": "added",
+                  "status": "added",
                   "after": "value5"
                 }
               ]
@@ -45,17 +45,17 @@
           },
           {
             "key": "setting6",
-            "type": "nested",
+            "status": "nested",
             "nested": {
               "items": [
                 {
                   "key": "doge",
-                  "type": "nested",
+                  "status": "nested",
                   "nested": {
                     "items": [
                       {
                         "key": "wow",
-                        "type": "updated",
+                        "status": "updated",
                         "before": "",
                         "after": "so much"
                       }
@@ -64,12 +64,12 @@
                 },
                 {
                   "key": "key",
-                  "type": "unchanged",
+                  "status": "unchanged",
                   "before": "value"
                 },
                 {
                   "key": "ops",
-                  "type": "added",
+                  "status": "added",
                   "after": "vops"
                 }
               ]
@@ -80,28 +80,28 @@
     },
     {
       "key": "group1",
-      "type": "nested",
+      "status": "nested",
       "nested": {
         "items": [
           {
             "key": "baz",
-            "type": "updated",
+            "status": "updated",
             "before": "bas",
             "after": "bars"
           },
           {
             "key": "foo",
-            "type": "unchanged",
+            "status": "unchanged",
             "before": "bar"
           },
           {
             "key": "nest",
-            "type": "removed",
+            "status": "removed",
             "nested": {
               "items": [
                 {
                   "key": "key",
-                  "type": "removed",
+                  "status": "removed",
                   "before": "value"
                 }
               ]
@@ -109,7 +109,7 @@
           },
           {
             "key": "nest",
-            "type": "added",
+            "status": "added",
             "after": "str"
           }
         ]
@@ -117,22 +117,22 @@
     },
     {
       "key": "group2",
-      "type": "removed",
+      "status": "removed",
       "nested": {
         "items": [
           {
             "key": "abc",
-            "type": "removed",
+            "status": "removed",
             "before": 12345
           },
           {
             "key": "deep",
-            "type": "removed",
+            "status": "removed",
             "nested": {
               "items": [
                 {
                   "key": "id",
-                  "type": "removed",
+                  "status": "removed",
                   "before": 45
                 }
               ]
@@ -143,22 +143,22 @@
     },
     {
       "key": "group3",
-      "type": "added",
+      "status": "added",
       "nested": {
         "items": [
           {
             "key": "deep",
-            "type": "added",
+            "status": "added",
             "nested": {
               "items": [
                 {
                   "key": "id",
-                  "type": "added",
+                  "status": "added",
                   "nested": {
                     "items": [
                       {
                         "key": "number",
-                        "type": "added",
+                        "status": "added",
                         "after": 45
                       }
                     ]
@@ -169,7 +169,7 @@
           },
           {
             "key": "fee",
-            "type": "added",
+            "status": "added",
             "after": 100500
           }
         ]

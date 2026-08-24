@@ -2,27 +2,27 @@
   "items": [
     {
       "key": "group1",
-      "type": "unchanged",
+      "status": "unchanged",
       "before": "baz"
     },
     {
       "key": "group2",
-      "type": "nested",
+      "status": "nested",
       "nested": {
         "items": [
           {
             "key": "group3",
-            "type": "removed",
+            "status": "removed",
             "before": "stars"
           },
           {
             "key": "group3",
-            "type": "added",
+            "status": "added",
             "nested": {
               "items": [
                 {
                   "key": "group4",
-                  "type": "added",
+                  "status": "added",
                   "after": 4
                 }
               ]
@@ -33,7 +33,7 @@
     },
     {
       "key": "group3",
-      "type": "unchanged",
+      "status": "unchanged",
       "before": 7
     }
   ]

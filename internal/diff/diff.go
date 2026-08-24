@@ -16,7 +16,7 @@ const (
 
 type DiffItem struct {
 	Key    string      `json:"key" yaml:"key"`
-	Type   string      `json:"type" yaml:"type"`
+	Status string      `json:"status" yaml:"status"`
 	Before interface{} `json:"before,omitempty" yaml:"before,omitempty"`
 	After  interface{} `json:"after,omitempty" yaml:"after,omitempty"`
 	Nested *DiffResult `json:"nested,omitempty" yaml:"nested,omitempty"`
@@ -76,11 +76,11 @@ func DiffFile(config1, config2 map[string]interface{}) (*DiffResult, error) {
 				if err != nil {
 					return nil, err
 				}
-				item.Type = ChangeAdded
+				item.Status = ChangeAdded
 				item.Nested = nestedResult
 			} else {
 				// Добавленный скаляр
-				item.Type = ChangeAdded
+				item.Status = ChangeAdded
 				item.After = v2
 			}
 		case ok1 && !ok2:
@@ -92,16 +92,16 @@ func DiffFile(config1, config2 map[string]interface{}) (*DiffResult, error) {
 				if err != nil {
 					return nil, err
 				}
-				item.Type = ChangeRemoved
+				item.Status = ChangeRemoved
 				item.Nested = nestedResult
 			} else {
 				// Удалённый скаляр
-				item.Type = ChangeRemoved
+				item.Status = ChangeRemoved
 				item.Before = v1
 			}
 		case isMap1 && isMap2:
 			// Вложенная структура присутствует в обоих файлах — сравниваем рекурсивно.
-			item.Type = ChangeNested
+			item.Status = ChangeNested
 			nestedResult, err := DiffFile(map1, map2)
 			if err != nil {
 				return nil, err
@@ -110,7 +110,7 @@ func DiffFile(config1, config2 map[string]interface{}) (*DiffResult, error) {
 		case isMap1 && !isMap2:
 			// Мапа превратилась в скаляр: рисуем два элемента —
 			// удалённую мапу и добавленный скаляр.
-			removed := DiffItem{Key: k, Type: ChangeRemoved}
+			removed := DiffItem{Key: k, Status: ChangeRemoved}
 			emptyMap := make(map[string]interface{})
 			nestedResult, err := DiffFile(map1, emptyMap)
 			if err != nil {
@@ -119,14 +119,14 @@ func DiffFile(config1, config2 map[string]interface{}) (*DiffResult, error) {
 			removed.Nested = nestedResult
 			items = append(items, removed)
 
-			item.Type = ChangeAdded
+			item.Status = ChangeAdded
 			item.After = v2
 		case !isMap1 && isMap2:
 			// Скаляр превратился в мапу: удалённый скаляр + добавленная мапа.
-			removed := DiffItem{Key: k, Type: ChangeRemoved, Before: v1}
+			removed := DiffItem{Key: k, Status: ChangeRemoved, Before: v1}
 			items = append(items, removed)
 
-			item.Type = ChangeAdded
+			item.Status = ChangeAdded
 			emptyMap := make(map[string]interface{})
 			nestedResult, err := DiffFile(emptyMap, map2)
 			if err != nil {
@@ -137,11 +137,11 @@ func DiffFile(config1, config2 map[string]interface{}) (*DiffResult, error) {
 			// Сравнение двух скаляров
 			if reflect.DeepEqual(v1, v2) {
 				// Значение не изменилось
-				item.Type = ChangeUnchanged
+				item.Status = ChangeUnchanged
 				item.Before = v1
 			} else {
 				// Значение изменилось
-				item.Type = ChangeUpdated
+				item.Status = ChangeUpdated
 				item.Before = v1
 				item.After = v2
 			}

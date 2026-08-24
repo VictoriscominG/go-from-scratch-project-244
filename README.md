@@ -13,6 +13,6 @@ CLI‑утилита для сравнения конфигурационных 
 ### Демонстрация работы:
 В этой интерактивной записи показано, как `gendiff` сравнивает два JSON‑файла, два Yaml-файла:
 
-[![Demo of gendiff](https://asciinema.org/a/gSnz0wF5tDc8siMB.svg)](https://asciinema.org/a/gSnz0wF5tDc8siMB)
+[![Demo of gendiff](https://asciinema.org/a/o1fTVW6cJVOjpQTQ.svg)](https://asciinema.org/a/o1fTVW6cJVOjpQTQ)
 
 > Нажмите на изображение выше, чтобы открыть плеер в браузере.

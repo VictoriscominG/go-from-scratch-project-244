@@ -1,25 +1,25 @@
-package render
+package formatters
 
 import (
 	"bytes"
-	"code/internal/diff"
+	mydiff "code/internal/diff"
 	"fmt"
 	"strings"
 )
 
-func RenderStylish(result *diff.DiffResult) string {
+func Stylish(result *mydiff.DiffResult) string {
 	var buf bytes.Buffer
 	buf.WriteString("{\n")
-	renderBlock(&buf, result.Items, 1, false)
+	blockStylish(&buf, result.Items, 1, false)
 	buf.WriteString("}")
 	return buf.String()
 }
 
-// renderBlock рисует список элементов на заданном уровне.
+// formatBlock рисует список элементов на заданном уровне.
 // Параметр isNested означает, что мы находимся внутри мапы, добавленной или
 // удалённой целиком. Внутри такого блока вложенные элементы выводятся без
 // знаков "+"/"-", но со своими значениями.
-func renderBlock(buf *bytes.Buffer, items []diff.DiffItem, level int, isNested bool) {
+func blockStylish(buf *bytes.Buffer, items []mydiff.DiffItem, level int, isNested bool) {
 	for _, item := range items {
 		// Если есть вложенная структура (мапа), рисуем блок со скобками
 		if item.Nested != nil {
@@ -27,15 +27,15 @@ func renderBlock(buf *bytes.Buffer, items []diff.DiffItem, level int, isNested b
 			if isNested {
 				prefix = " "
 			} else {
-				prefix = getPrefix(item.Type)
+				prefix = getPrefix(item.Status)
 			}
 			indentStr := calcIndent(level)
 
 			buf.WriteString(fmt.Sprintf("%s%s %s: {\n", indentStr, prefix, item.Key))
 
 			// Внутри добавленного/удалённого блока знаки подавляем
-			childNested := item.Type == diff.ChangeAdded || item.Type == diff.ChangeRemoved
-			renderBlock(buf, item.Nested.Items, level+1, childNested)
+			childNested := item.Status == mydiff.ChangeAdded || item.Status == mydiff.ChangeRemoved
+			blockStylish(buf, item.Nested.Items, level+1, childNested)
 
 			// Закрываем скобку
 			buf.WriteString(fmt.Sprintf("%s  }\n", indentStr))
@@ -43,14 +43,14 @@ func renderBlock(buf *bytes.Buffer, items []diff.DiffItem, level int, isNested b
 		}
 
 		// Обычные строки (не мапы)
-		prefix := getPrefix(item.Type)
+		prefix := getPrefix(item.Status)
 		indentStr := calcIndent(level)
 
 		// Внутри добавленного/удалённого блока знак не рисуем,
 		// но значение (After для added, Before для removed) выводим.
 		if isNested {
 			valStr := formatValue(item.After)
-			if item.Type == diff.ChangeRemoved || item.Type == diff.ChangeUnchanged {
+			if item.Status == mydiff.ChangeRemoved || item.Status == mydiff.ChangeUnchanged {
 				valStr = formatValue(item.Before)
 			}
 
@@ -58,8 +58,8 @@ func renderBlock(buf *bytes.Buffer, items []diff.DiffItem, level int, isNested b
 			continue
 		}
 
-		switch item.Type {
-		case diff.ChangeUpdated:
+		switch item.Status {
+		case mydiff.ChangeUpdated:
 			beforeStr := formatValue(item.Before)
 			afterStr := formatValue(item.After)
 
@@ -70,7 +70,7 @@ func renderBlock(buf *bytes.Buffer, items []diff.DiffItem, level int, isNested b
 			buf.WriteString(fmt.Sprintf("%s+ %s: %s\n", plusIndent, item.Key, afterStr))
 		default:
 			valStr := formatValue(item.After) // Для Added
-			if item.Type == diff.ChangeRemoved || item.Type == diff.ChangeUnchanged {
+			if item.Status == mydiff.ChangeRemoved || item.Status == mydiff.ChangeUnchanged {
 				valStr = formatValue(item.Before) // Для Removed/Unchanged
 			}
 			buf.WriteString(fmt.Sprintf("%s%s %s: %s\n", indentStr, prefix, item.Key, valStr))
@@ -90,9 +90,9 @@ func calcIndent(level int) string {
 // getPrefix по константе возвращает необходимый префикс
 func getPrefix(t string) string {
 	switch t {
-	case diff.ChangeAdded:
+	case mydiff.ChangeAdded:
 		return "+"
-	case diff.ChangeRemoved:
+	case mydiff.ChangeRemoved:
 		return "-"
 	default:
 		return " " // для unchanged

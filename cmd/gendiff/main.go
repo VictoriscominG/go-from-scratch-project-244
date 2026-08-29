@@ -1,9 +1,7 @@
 package main
 
 import (
-	mydiff "code/internal/diff"
-	myformatter "code/internal/formatters"
-	myparser "code/internal/parser"
+	"code"
 	"context"
 	"fmt"
 	"log"
@@ -31,29 +29,14 @@ func main() {
 			}
 			path1 := args[0]
 			path2 := args[1]
-
 			format := cmd.String("format")
 
-			config1, err := myparser.ParseFile(path1)
-			if err != nil {
-				return err
-			}
-			config2, err := myparser.ParseFile(path2)
+			str, err := code.GenDiff(path1, path2, format)
 			if err != nil {
 				return err
 			}
 
-			diffResult, err := mydiff.DiffFile(config1, config2)
-			if err != nil {
-				return err
-			}
-
-			str, err := myformatter.Formatters(diffResult, format)
-			if err != nil {
-				return err
-			}
 			fmt.Println(str)
-
 			return nil
 		},
 	}

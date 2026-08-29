@@ -13,6 +13,7 @@ import (
 func TestFormatters(t *testing.T) {
 	tests := []struct {
 		name, before, after, expected, format string
+		err                                   bool
 	}{
 		{
 			name:     "test json file diff format stylish",
@@ -20,42 +21,49 @@ func TestFormatters(t *testing.T) {
 			after:    "recursive-file2.json",
 			expected: "expected-diff-stylish.txt",
 			format:   "stylish",
+			err:      false,
 		}, {
 			name:     "test yaml file diff format stylish",
 			before:   "recursive-file1.yaml",
 			after:    "recursive-file2.yaml",
 			expected: "expected-diff-stylish.txt",
 			format:   "stylish",
+			err:      false,
 		}, {
 			name:     "test json file diff format plain",
 			before:   "recursive-file1.json",
 			after:    "recursive-file2.json",
 			expected: "expected-diff-plain.txt",
 			format:   "plain",
+			err:      false,
 		}, {
 			name:     "test yaml file diff format plain",
 			before:   "recursive-file1.yaml",
 			after:    "recursive-file2.yaml",
 			expected: "expected-diff-plain.txt",
 			format:   "plain",
+			err:      false,
 		}, {
 			name:     "test json file diff format json",
 			before:   "recursive-file1.json",
 			after:    "recursive-file2.json",
 			expected: "expected-diff-json.txt",
 			format:   "json",
+			err:      false,
 		}, {
 			name:     "test yaml file diff format json",
 			before:   "recursive-file1.yaml",
 			after:    "recursive-file2.yaml",
 			expected: "expected-diff-json.txt",
 			format:   "json",
+			err:      false,
 		}, {
-			name:     "test json file diff whithout format",
+			name:     "test json file diff whith missing format",
 			before:   "recursive-file1.json",
 			after:    "recursive-file2.json",
 			expected: "expected-diff-stylish.txt",
-			format:   "",
+			format:   "xml",
+			err:      true,
 		},
 	}
 
@@ -75,6 +83,10 @@ func TestFormatters(t *testing.T) {
 			require.NoError(t, err)
 
 			renderResult, err := Formatters(diffResult, tt.format)
+			if tt.err {
+				require.Error(t, err)
+				return
+			}
 			require.NoError(t, err)
 
 			expected, err := os.ReadFile(expectedPath)

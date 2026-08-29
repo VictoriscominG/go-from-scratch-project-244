@@ -1,11 +1,16 @@
 package formatters
 
-import mydiff "code/internal/diff"
+import (
+	mydiff "code/internal/diff"
+	"fmt"
+)
 
 func Formatters(result *mydiff.DiffResult, format string) (string, error) {
 	var str string
 	var err error
 	switch format {
+	case "stylish":
+		str = Stylish(result)
 	case "plain":
 		str = Plain(result)
 	case "json":
@@ -14,7 +19,7 @@ func Formatters(result *mydiff.DiffResult, format string) (string, error) {
 			return "", err
 		}
 	default:
-		str = Stylish(result)
+		return "", fmt.Errorf("the missing output format is specified: %s. Specify the plain, stylish, or json format.", format)
 	}
 	return str, nil
 }

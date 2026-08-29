@@ -63,11 +63,10 @@ func blockStylish(buf *bytes.Buffer, items []mydiff.DiffItem, level int, isNeste
 			beforeStr := formatValue(item.Before)
 			afterStr := formatValue(item.After)
 
-			minusIndent := calcIndent(level)
-			plusIndent := calcIndent(level)
+			indentStr := calcIndent(level)
 
-			buf.WriteString(fmt.Sprintf("%s- %s: %s\n", minusIndent, item.Key, beforeStr))
-			buf.WriteString(fmt.Sprintf("%s+ %s: %s\n", plusIndent, item.Key, afterStr))
+			buf.WriteString(fmt.Sprintf("%s- %s: %s\n", indentStr, item.Key, beforeStr))
+			buf.WriteString(fmt.Sprintf("%s+ %s: %s\n", indentStr, item.Key, afterStr))
 		default:
 			valStr := formatValue(item.After) // Для Added
 			if item.Status == mydiff.ChangeRemoved || item.Status == mydiff.ChangeUnchanged {

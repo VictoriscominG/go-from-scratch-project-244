@@ -63,8 +63,5 @@ jobs:
           projectBaseDir: .
           args: >
             -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.organization=victoriscoming
-            -Dsonar.projectKey=VictoriscominG_go-from-scratch-project-244
-            -Dsonar.go.coverage.reportPaths=./coverage.out
             -Dsonar.scm.revision=${{ github.sha }}
             -Dsonar.scm.branch=${{ github.ref_name }}

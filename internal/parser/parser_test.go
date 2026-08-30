@@ -1,6 +1,7 @@
 package parser
 
 import (
+	fix "code/internal/testfixtures"
 	"errors"
 	"os"
 	"path/filepath"
@@ -15,7 +16,7 @@ func TestParseFile(t *testing.T) {
 	basePath := filepath.Join("..", "..", "testdata")
 
 	t.Run("test recursive file json parse", func(t *testing.T) {
-		path := filepath.Join(basePath, "recursive-file1.json")
+		path := filepath.Join(basePath, fix.RecursiveFile1JSON)
 
 		cfg, err := ParseFile(path)
 		require.NoError(t, err)
@@ -31,7 +32,7 @@ func TestParseFile(t *testing.T) {
 	})
 
 	t.Run("test recursive yaml parse", func(t *testing.T) {
-		path := filepath.Join(basePath, "recursive-file1.yaml")
+		path := filepath.Join(basePath, fix.RecursiveFile1YAML)
 
 		cfg, err := ParseFile(path)
 		require.NoError(t, err)

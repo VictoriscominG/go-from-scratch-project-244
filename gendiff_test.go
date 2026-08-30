@@ -1,6 +1,7 @@
 package code
 
 import (
+	fix "code/internal/testfixtures"
 	"os"
 	"path/filepath"
 	"testing"
@@ -8,16 +9,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var beforePath = filepath.Join("testdata", fix.RecursiveFile1JSON)
+var afterPath = filepath.Join("testdata", fix.RecursiveFile2JSON)
+var expectedPath = filepath.Join("testdata", fix.ExpectedDiffPlain)
+
 func TestGenDiff(t *testing.T) {
 	t.Run("test diff json file", func(t *testing.T) {
-		result, err := GenDiff(
-			"testdata/recursive-file1.json",
-			"testdata/recursive-file2.json",
-			"plain",
-		)
+		result, err := GenDiff(beforePath, afterPath, "plain")
 		require.NoError(t, err)
 
-		expected, err := os.ReadFile("testdata/expected-diff-plain.txt")
+		expected, err := os.ReadFile(expectedPath)
 		require.NoError(t, err)
 		require.Equal(t, string(expected), result)
 	})
@@ -27,7 +28,7 @@ func TestGenDiff(t *testing.T) {
 		path1 := filepath.Join(tempDir, "txt-file.txt")
 		require.NoError(t, os.WriteFile(path1, []byte("{}"), 0o644))
 
-		_, err := GenDiff(path1, "testdata/recursive-file2.json", "plain")
+		_, err := GenDiff(path1, afterPath, "plain")
 
 		require.Error(t, err)
 	})
@@ -37,17 +38,13 @@ func TestGenDiff(t *testing.T) {
 		path2 := filepath.Join(tempDir, "txt-file.txt")
 		require.NoError(t, os.WriteFile(path2, []byte("{}"), 0o644))
 
-		_, err := GenDiff("testdata/recursive-file1.json", path2, "plain")
+		_, err := GenDiff(beforePath, path2, "plain")
 
 		require.Error(t, err)
 	})
 
 	t.Run("test json file diff whith missing format", func(t *testing.T) {
-		_, err := GenDiff(
-			"testdata/recursive-file1.json",
-			"testdata/recursive-file2.json",
-			"xml",
-		)
+		_, err := GenDiff(afterPath, beforePath, "xml")
 		require.Error(t, err)
 	})
 }

@@ -3,6 +3,7 @@ package formatters
 import (
 	mydiff "code/internal/diff"
 	myparser "code/internal/parser"
+	fix "code/internal/testfixtures"
 	"os"
 	"path/filepath"
 	"testing"
@@ -17,51 +18,51 @@ func TestFormatters(t *testing.T) {
 	}{
 		{
 			name:     "test json file diff format stylish",
-			before:   "recursive-file1.json",
-			after:    "recursive-file2.json",
-			expected: "expected-diff-stylish.txt",
+			before:   fix.RecursiveFile1JSON,
+			after:    fix.RecursiveFile2JSON,
+			expected: fix.ExpectedDiffStylish,
 			format:   "stylish",
 			err:      false,
 		}, {
 			name:     "test yaml file diff format stylish",
-			before:   "recursive-file1.yaml",
-			after:    "recursive-file2.yaml",
-			expected: "expected-diff-stylish.txt",
+			before:   fix.RecursiveFile1YAML,
+			after:    fix.RecursiveFile2YAML,
+			expected: fix.ExpectedDiffStylish,
 			format:   "stylish",
 			err:      false,
 		}, {
 			name:     "test json file diff format plain",
-			before:   "recursive-file1.json",
-			after:    "recursive-file2.json",
-			expected: "expected-diff-plain.txt",
+			before:   fix.RecursiveFile1JSON,
+			after:    fix.RecursiveFile2JSON,
+			expected: fix.ExpectedDiffPlain,
 			format:   "plain",
 			err:      false,
 		}, {
 			name:     "test yaml file diff format plain",
-			before:   "recursive-file1.yaml",
-			after:    "recursive-file2.yaml",
-			expected: "expected-diff-plain.txt",
+			before:   fix.RecursiveFile1YAML,
+			after:    fix.RecursiveFile2YAML,
+			expected: fix.ExpectedDiffPlain,
 			format:   "plain",
 			err:      false,
 		}, {
 			name:     "test json file diff format json",
-			before:   "recursive-file1.json",
-			after:    "recursive-file2.json",
-			expected: "expected-diff-json.txt",
+			before:   fix.RecursiveFile1JSON,
+			after:    fix.RecursiveFile2JSON,
+			expected: fix.ExpectedDiffJSON,
 			format:   "json",
 			err:      false,
 		}, {
 			name:     "test yaml file diff format json",
-			before:   "recursive-file1.yaml",
-			after:    "recursive-file2.yaml",
-			expected: "expected-diff-json.txt",
+			before:   fix.RecursiveFile1YAML,
+			after:    fix.RecursiveFile2YAML,
+			expected: fix.ExpectedDiffJSON,
 			format:   "json",
 			err:      false,
 		}, {
 			name:     "test json file diff whith missing format",
-			before:   "recursive-file1.json",
-			after:    "recursive-file2.json",
-			expected: "expected-diff-stylish.txt",
+			before:   fix.RecursiveFile1JSON,
+			after:    fix.RecursiveFile2JSON,
+			expected: fix.ExpectedDiffStylish,
 			format:   "xml",
 			err:      true,
 		},

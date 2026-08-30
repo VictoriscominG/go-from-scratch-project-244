@@ -2,6 +2,7 @@ package diff
 
 import (
 	myparser "code/internal/parser"
+	fix "code/internal/testfixtures"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -15,9 +16,9 @@ func TestDiffFile(t *testing.T) {
 	basePath := filepath.Join("..", "..", "testdata")
 
 	t.Run("test recursive diff json", func(t *testing.T) {
-		beforePath := filepath.Join(basePath, "recursive-file1.json")
-		afterPath := filepath.Join(basePath, "recursive-file2.json")
-		expectedPath := filepath.Join(basePath, "expected-diff-json.txt")
+		beforePath := filepath.Join(basePath, fix.RecursiveFile1JSON)
+		afterPath := filepath.Join(basePath, fix.RecursiveFile2JSON)
+		expectedPath := filepath.Join(basePath, fix.ExpectedDiffJSON)
 
 		before, err := myparser.ParseFile(beforePath)
 		require.NoError(t, err)
@@ -42,7 +43,7 @@ func TestDiffFile(t *testing.T) {
 	})
 
 	t.Run("test the scalar has turned into a map", func(t *testing.T) {
-		expectedPath := filepath.Join(basePath, "expected-diff-test2.txt")
+		expectedPath := filepath.Join(basePath, fix.ExpectedDiffTest2)
 		before := map[string]interface{}{
 			"group1": "baz",
 			"group2": map[string]interface{}{"group3": "stars"},

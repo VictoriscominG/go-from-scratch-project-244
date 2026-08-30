@@ -34,21 +34,7 @@ func DiffFile(config1, config2 map[string]interface{}) (*DiffResult, error) {
 		return nil, fmt.Errorf("I can’t compare an empty configuration: %v", config2)
 	}
 
-	// Собираем все уникальные ключи из двух структур
-	keysMap := make(map[string]struct{})
-	for k := range config1 {
-		keysMap[k] = struct{}{}
-	}
-	for k := range config2 {
-		keysMap[k] = struct{}{}
-	}
-
-	// Превращаем ключи в срез и сортируем по алфавиту (для детерминированного вывода)
-	keys := make([]string, 0, len(keysMap))
-	for k := range keysMap {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
+	keys := keysCollect(config1, config2)
 
 	// Объявляем коллекцию []DiffItem для сбора элементов diff
 	var items []DiffItem
@@ -68,35 +54,31 @@ func DiffFile(config1, config2 map[string]interface{}) (*DiffResult, error) {
 		switch {
 		case !ok1 && ok2:
 			// Добавлено
+			item.Status = ChangeAdded
 			if isMap2 {
 				// Добавили мапу целиком: внутри неё ничего не сравнивается,
 				// все вложенные элементы помечаем как added (со значениями).
-				emptyMap := make(map[string]interface{})
-				nestedResult, err := DiffFile(emptyMap, map2)
+				nestedResult, err := diffMapAgainstEmpty(map2, false)
 				if err != nil {
 					return nil, err
 				}
-				item.Status = ChangeAdded
 				item.Nested = nestedResult
 			} else {
 				// Добавленный скаляр
-				item.Status = ChangeAdded
 				item.After = v2
 			}
 		case ok1 && !ok2:
 			// Удалено
+			item.Status = ChangeRemoved
 			if isMap1 {
 				// Удалили мапу целиком: все вложенные элементы — removed (со значениями).
-				emptyMap := make(map[string]interface{})
-				nestedResult, err := DiffFile(map1, emptyMap)
+				nestedResult, err := diffMapAgainstEmpty(map1, true)
 				if err != nil {
 					return nil, err
 				}
-				item.Status = ChangeRemoved
 				item.Nested = nestedResult
 			} else {
 				// Удалённый скаляр
-				item.Status = ChangeRemoved
 				item.Before = v1
 			}
 		case isMap1 && isMap2:
@@ -111,8 +93,7 @@ func DiffFile(config1, config2 map[string]interface{}) (*DiffResult, error) {
 			// Мапа превратилась в скаляр: рисуем два элемента —
 			// удалённую мапу и добавленный скаляр.
 			removed := DiffItem{Key: k, Status: ChangeRemoved}
-			emptyMap := make(map[string]interface{})
-			nestedResult, err := DiffFile(map1, emptyMap)
+			nestedResult, err := diffMapAgainstEmpty(map1, true)
 			if err != nil {
 				return nil, err
 			}
@@ -127,26 +108,54 @@ func DiffFile(config1, config2 map[string]interface{}) (*DiffResult, error) {
 			items = append(items, removed)
 
 			item.Status = ChangeAdded
-			emptyMap := make(map[string]interface{})
-			nestedResult, err := DiffFile(emptyMap, map2)
+			nestedResult, err := diffMapAgainstEmpty(map2, false)
 			if err != nil {
 				return nil, err
 			}
 			item.Nested = nestedResult
 		default:
-			// Сравнение двух скаляров
-			if reflect.DeepEqual(v1, v2) {
-				// Значение не изменилось
-				item.Status = ChangeUnchanged
-				item.Before = v1
-			} else {
-				// Значение изменилось
-				item.Status = ChangeUpdated
-				item.Before = v1
-				item.After = v2
-			}
+			status, a, b := compareScalar(v1, v2)
+			item.Status = status
+			item.Before = a
+			item.After = b
 		}
 		items = append(items, item)
 	}
 	return &DiffResult{Items: items}, nil
+}
+
+// keysCollect собирает все уникальные ключи из двух структур
+func keysCollect(config1, config2 map[string]interface{}) []string {
+	keysMap := make(map[string]struct{})
+	for k := range config1 {
+		keysMap[k] = struct{}{}
+	}
+	for k := range config2 {
+		keysMap[k] = struct{}{}
+	}
+
+	// Превращаем ключи в срез и сортируем по алфавиту (для детерминированного вывода)
+	keys := make([]string, 0, len(keysMap))
+	for k := range keysMap {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+// diffMapAgainstEmpty делает сравнение существующей мапы с пустой
+func diffMapAgainstEmpty(m map[string]interface{}, isLeft bool) (*DiffResult, error) {
+	empty := make(map[string]interface{})
+	if isLeft {
+		return DiffFile(m, empty)
+	}
+	return DiffFile(empty, m)
+}
+
+// compareScalar сравнивает два скаляра
+func compareScalar(v1, v2 interface{}) (status string, before, after interface{}) {
+	if reflect.DeepEqual(v1, v2) {
+		return ChangeUnchanged, v1, nil
+	}
+	return ChangeUpdated, v1, v2
 }
